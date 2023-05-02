@@ -11,6 +11,7 @@
 		1246C5252A00A75E002FFCB2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1246C5242A00A75E002FFCB2 /* ContentView.swift */; };
 		1246C5272A00A75F002FFCB2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1246C5262A00A75F002FFCB2 /* Assets.xcassets */; };
 		1246C52A2A00A75F002FFCB2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1246C5292A00A75F002FFCB2 /* Preview Assets.xcassets */; };
+		1246C5312A016DBA002FFCB2 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1246C5302A016DBA002FFCB2 /* ImagePicker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,6 +20,7 @@
 		1246C5242A00A75E002FFCB2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		1246C5262A00A75F002FFCB2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1246C5292A00A75F002FFCB2 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		1246C5302A016DBA002FFCB2 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +55,7 @@
 			children = (
 				1246C5222A00A75E002FFCB2 /* InstafilterApp.swift */,
 				1246C5242A00A75E002FFCB2 /* ContentView.swift */,
+				1246C5302A016DBA002FFCB2 /* ImagePicker.swift */,
 				1246C5262A00A75F002FFCB2 /* Assets.xcassets */,
 				1246C5282A00A75F002FFCB2 /* Preview Content */,
 			);
@@ -137,6 +140,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1246C5312A016DBA002FFCB2 /* ImagePicker.swift in Sources */,
 				1246C5252A00A75E002FFCB2 /* ContentView.swift in Sources */,
 				1246C5232A00A75E002FFCB2 /* InstafilterApp.swift in Sources */,
 			);

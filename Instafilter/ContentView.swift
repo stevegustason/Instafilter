@@ -6,11 +6,81 @@
 //
 
 import SwiftUI
+import CoreImage
+import CoreImage.CIFilterBuiltins
 
 struct ContentView: View {
     @State private var blurAmount = 0.0
     @State private var showingConfirmation = false
-        @State private var backgroundColor = Color.white
+    @State private var backgroundColor = Color.white
+    @State private var image: Image?
+    @State private var showingImagePicker = false
+    
+    func loadImage() {
+        // Load our example image into a UIImage
+        guard let inputImage = UIImage(named: "Zelda") else { return }
+        // Convert our UIImage to a CIImage so we can work with Core Image
+        let beginImage = CIImage(image: inputImage)
+
+        // Create a context to handle converting our processed data into a CGImage we can work with
+        let context = CIContext()
+        
+        /*
+        // Create a sepia filter
+        let currentFilter = CIFilter.sepiaTone()
+        // Apply our sepia filter to our image
+        currentFilter.inputImage = beginImage
+        // At full intensity
+        currentFilter.intensity = 1
+         */
+        
+        /*
+        // Pixelate filter to make the image look like a pixel image
+        let currentFilter = CIFilter.pixellate()
+        currentFilter.inputImage = beginImage
+        currentFilter.scale = 100
+        */
+        
+        /*
+        // Crystallize filter to make the image look like stained glass
+        let currentFilter = CIFilter.crystallize()
+        currentFilter.inputImage = beginImage
+        currentFilter.radius = 200
+        */
+        
+        /*
+        // Twirl filter to add a swirl in the image
+        let currentFilter = CIFilter.twirlDistortion()
+        currentFilter.inputImage = beginImage
+        currentFilter.radius = 1000
+        currentFilter.center = CGPoint(x: inputImage.size.width / 2, y: inputImage.size.height / 2)
+         */
+        
+        // Using the older API as we do in the chunk below allows us to set values dynamically - we canliterally ask the current filter what values it supports, then send them on in. This allows us to swap in any different filter without changing our code. Generally, using the modern API is better, but this will give us some more flexibility.
+        let currentFilter = CIFilter.twirlDistortion()
+        currentFilter.inputImage = beginImage
+
+        let amount = 1.0
+
+        let inputKeys = currentFilter.inputKeys
+
+        if inputKeys.contains(kCIInputIntensityKey) {
+            currentFilter.setValue(amount, forKey: kCIInputIntensityKey) }
+        if inputKeys.contains(kCIInputRadiusKey) { currentFilter.setValue(amount * 200, forKey: kCIInputRadiusKey) }
+        if inputKeys.contains(kCIInputScaleKey) { currentFilter.setValue(amount * 10, forKey: kCIInputScaleKey) }
+        
+        // Get a CIImage from our filter or exit if that fails
+        guard let outputImage = currentFilter.outputImage else { return }
+
+        // Attempt to get a CGImage from our CIImage
+        if let cgimg = context.createCGImage(outputImage, from: outputImage.extent) {
+            // Convert that to a UIImage
+            let uiImage = UIImage(cgImage: cgimg)
+
+            // And convert that to a SwiftUI image
+            image = Image(uiImage: uiImage)
+        }
+    }
 
     var body: some View {
         VStack {
@@ -38,6 +108,18 @@ struct ContentView: View {
                 } message: {
                     Text("Select a new color")
                 }
+            
+            image?
+                .resizable()
+                .scaledToFit()
+            
+            Button("Select Image") {
+                showingImagePicker = true
+            }
+        }
+        .onAppear(perform: loadImage)
+        .sheet(isPresented: $showingImagePicker) {
+            ImagePicker()
         }
     }
 }
