@@ -16,6 +16,17 @@ struct ContentView: View {
     @State private var image: Image?
     @State private var showingImagePicker = false
     
+    // Property to pass into our ImagePicker so it can be updated when the user selects an image
+    @State private var inputImage: UIImage?
+    
+    // Method that checks whether inputImage has a value, and if it does uses it to assign a new Image view to the image property. Also, save the image that got loaded to the user's photo album.
+    func loadImage() {
+        guard let inputImage = inputImage else { return }
+        image = Image(uiImage: inputImage)
+        UIImageWriteToSavedPhotosAlbum(inputImage, nil, nil, nil)
+    }
+    
+    /*
     func loadImage() {
         // Load our example image into a UIImage
         guard let inputImage = UIImage(named: "Zelda") else { return }
@@ -81,6 +92,7 @@ struct ContentView: View {
             image = Image(uiImage: uiImage)
         }
     }
+    */
 
     var body: some View {
         VStack {
@@ -119,8 +131,9 @@ struct ContentView: View {
         }
         .onAppear(perform: loadImage)
         .sheet(isPresented: $showingImagePicker) {
-            ImagePicker()
+            ImagePicker(image: $inputImage)
         }
+        .onChange(of: inputImage) { _ in loadImage() }
     }
 }
 
