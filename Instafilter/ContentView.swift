@@ -23,6 +23,7 @@ struct ContentView: View {
     func loadImage() {
         guard let inputImage = inputImage else { return }
         image = Image(uiImage: inputImage)
+        // This method saves images to the user's photo albums. For its parameters: the first one is the image to save, the second one is an object that should be notified about the result of the save, the third one is the method on the object that should be run, and the fourth one will be passed back to us when our completion method is called.
         UIImageWriteToSavedPhotosAlbum(inputImage, nil, nil, nil)
     }
     
@@ -127,6 +128,12 @@ struct ContentView: View {
             
             Button("Select Image") {
                 showingImagePicker = true
+            }
+            Button("Save Image") {
+                guard let inputImage = inputImage else { return }
+
+                let imageSaver = ImageSaver()
+                imageSaver.writeToPhotoAlbum(image: inputImage)
             }
         }
         .onAppear(perform: loadImage)
