@@ -10,137 +10,101 @@ import CoreImage
 import CoreImage.CIFilterBuiltins
 
 struct ContentView: View {
-    @State private var blurAmount = 0.0
-    @State private var showingConfirmation = false
-    @State private var backgroundColor = Color.white
+    // Optional image property since the user won't have initially selected an image
     @State private var image: Image?
+    // Controls the intensity of the filter applied to the user's image, and binds to the intensity slider
+    @State private var filterIntensity = 0.5
+    // Controls whether the image picker is displayed
     @State private var showingImagePicker = false
-    
-    // Property to pass into our ImagePicker so it can be updated when the user selects an image
+    // Property that will store the image the user selected
     @State private var inputImage: UIImage?
+    // Set our current core image filter
+    @State private var currentFilter = CIFilter.sepiaTone()
+    // Create our context
+    let context = CIContext()
     
-    // Method that checks whether inputImage has a value, and if it does uses it to assign a new Image view to the image property. Also, save the image that got loaded to the user's photo album.
-    func loadImage() {
-        guard let inputImage = inputImage else { return }
-        image = Image(uiImage: inputImage)
-        // This method saves images to the user's photo albums. For its parameters: the first one is the image to save, the second one is an object that should be notified about the result of the save, the third one is the method on the object that should be run, and the fourth one will be passed back to us when our completion method is called.
-        UIImageWriteToSavedPhotosAlbum(inputImage, nil, nil, nil)
+    // Method that is called when the user clicks the save button. It will save the photo in its current state to the user's image library
+    func save() {
     }
     
-    /*
+    // Method that is called when the ImagePicker is dismissed.
     func loadImage() {
-        // Load our example image into a UIImage
-        guard let inputImage = UIImage(named: "Zelda") else { return }
-        // Convert our UIImage to a CIImage so we can work with Core Image
+        guard let inputImage = inputImage else { return }
+        
+        // Send the chosen image into our sepia filter, then use applyProcessing to apply it
         let beginImage = CIImage(image: inputImage)
+            currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
+            applyProcessing()
+    }
+    
+    func applyProcessing() {
+        // Set our filter's intensity based on the filterIntensity slider value
+        currentFilter.intensity = Float(filterIntensity)
 
-        // Create a context to handle converting our processed data into a CGImage we can work with
-        let context = CIContext()
-        
-        /*
-        // Create a sepia filter
-        let currentFilter = CIFilter.sepiaTone()
-        // Apply our sepia filter to our image
-        currentFilter.inputImage = beginImage
-        // At full intensity
-        currentFilter.intensity = 1
-         */
-        
-        /*
-        // Pixelate filter to make the image look like a pixel image
-        let currentFilter = CIFilter.pixellate()
-        currentFilter.inputImage = beginImage
-        currentFilter.scale = 100
-        */
-        
-        /*
-        // Crystallize filter to make the image look like stained glass
-        let currentFilter = CIFilter.crystallize()
-        currentFilter.inputImage = beginImage
-        currentFilter.radius = 200
-        */
-        
-        /*
-        // Twirl filter to add a swirl in the image
-        let currentFilter = CIFilter.twirlDistortion()
-        currentFilter.inputImage = beginImage
-        currentFilter.radius = 1000
-        currentFilter.center = CGPoint(x: inputImage.size.width / 2, y: inputImage.size.height / 2)
-         */
-        
-        // Using the older API as we do in the chunk below allows us to set values dynamically - we canliterally ask the current filter what values it supports, then send them on in. This allows us to swap in any different filter without changing our code. Generally, using the modern API is better, but this will give us some more flexibility.
-        let currentFilter = CIFilter.twirlDistortion()
-        currentFilter.inputImage = beginImage
-
-        let amount = 1.0
-
-        let inputKeys = currentFilter.inputKeys
-
-        if inputKeys.contains(kCIInputIntensityKey) {
-            currentFilter.setValue(amount, forKey: kCIInputIntensityKey) }
-        if inputKeys.contains(kCIInputRadiusKey) { currentFilter.setValue(amount * 200, forKey: kCIInputRadiusKey) }
-        if inputKeys.contains(kCIInputScaleKey) { currentFilter.setValue(amount * 10, forKey: kCIInputScaleKey) }
-        
-        // Get a CIImage from our filter or exit if that fails
+        // Read the output image back from the filter
         guard let outputImage = currentFilter.outputImage else { return }
 
-        // Attempt to get a CGImage from our CIImage
+        // Ask our CIContext to render it, then place the result into our image property so it’s visible on-screen
         if let cgimg = context.createCGImage(outputImage, from: outputImage.extent) {
-            // Convert that to a UIImage
             let uiImage = UIImage(cgImage: cgimg)
-
-            // And convert that to a SwiftUI image
             image = Image(uiImage: uiImage)
         }
     }
-    */
-
+    
     var body: some View {
-        VStack {
-            Text("Hello, World!")
-                .blur(radius: blurAmount)
-            
-            Slider(value: $blurAmount, in: 0...20)
-            // Because of the way SwiftUI sends binding updates to property wrappers, assigning property observers used with property wrappers often won’t work. To fix this we need to use the onChange() modifier, which tells SwiftUI to run a function of our choosing when a particular value changes. SwiftUI will automatically pass in the new value to whatever function you attach, or you can just read the original property if you prefer.
-                .onChange(of: blurAmount) { newValue in
-                    print("New value is \(newValue)")
+        NavigationView {
+            VStack {
+                ZStack {
+                    // Furthest back, we show a gray rectangle
+                    Rectangle()
+                        .fill(.secondary)
+                    
+                    // Then on top of that we have white foreground text
+                    Text("Tap to select a picture")
+                        .foregroundColor(.white)
+                        .font(.headline)
+                    
+                    // However, once a user selects an image, the gray background and white text will be hidden by the image that is scaled to fit the whole space
+                    image?
+                        .resizable()
+                        .scaledToFit()
                 }
-            
-            Text("Hello, World!")
-                .frame(width: 300, height: 300)
-                .background(backgroundColor)
+                // When the user clicks in this area, we'll display our image picker
                 .onTapGesture {
-                    showingConfirmation = true
+                    showingImagePicker = true
                 }
-            // Confirmation dialog is very similar to alert in the way it's implemented. The main difference is that confirmationDialog allows for multiple buttons instead of just one or two in an alert. It also works differently in the way it looks - it slides up from the bottom of the screen and you can click outside of it to dismiss it.
-                .confirmationDialog("Change background", isPresented: $showingConfirmation) {
-                    Button("Red") { backgroundColor = .red }
-                    Button("Green") { backgroundColor = .green }
-                    Button("Blue") { backgroundColor = .blue }
-                    Button("Cancel", role: .cancel) { }
-                } message: {
-                    Text("Select a new color")
+                
+                // A slider for the user to adjust the intensity of the filter on their selected image
+                HStack {
+                    Text("Intensity")
+                    Slider(value: $filterIntensity)
+                    // When we change the filterIntesity using the silder, we want to re-call applyProcessing to update the image's filter
+                        .onChange(of: filterIntensity) { _ in
+                                applyProcessing()
+                            }
                 }
-            
-            image?
-                .resizable()
-                .scaledToFit()
-            
-            Button("Select Image") {
-                showingImagePicker = true
+                .padding(.vertical)
+                
+                // And finally two buttons - one to change which core filter is applied, and the other to save the photo to the user's image library
+                HStack {
+                    Button("Change Filter") {
+                        // change filter
+                    }
+                    
+                    Spacer()
+                    
+                    Button("Save", action: save)
+                }
             }
-            Button("Save Image") {
-                guard let inputImage = inputImage else { return }
-
-                let imageSaver = ImageSaver()
-                imageSaver.writeToPhotoAlbum(image: inputImage)
+            .padding([.horizontal, .bottom])
+            .navigationTitle("Instafilter")
+            // When inputImage changes, call loadImage to place our image in the UI
+            .onChange(of: inputImage) { _ in loadImage() }
+            // When the onTapGesture is triggered to update our showingImagePicker variable, we'll show an ImagePicker bound to inputImage
+            .sheet(isPresented: $showingImagePicker) {
+                ImagePicker(image: $inputImage)
             }
         }
-        .onAppear(perform: loadImage)
-        .sheet(isPresented: $showingImagePicker) {
-            ImagePicker(image: $inputImage)
-        }
-        .onChange(of: inputImage) { _ in loadImage() }
     }
 }
 
